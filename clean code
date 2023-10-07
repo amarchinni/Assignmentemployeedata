@@ -1,0 +1,120 @@
+package assignment_timeline;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+class Employee {
+    private String name;
+    private int position;
+    private int consecutiveDaysWorked;
+    private int hoursBetweenShifts;
+    private int hoursWorkedInSingleShift;
+
+    public Employee(String name, int position) {
+        this.name = name;
+        this.position = position;
+        this.consecutiveDaysWorked = 0;
+        this.hoursBetweenShifts = 0;
+        this.hoursWorkedInSingleShift = 0;
+    }
+   
+
+    
+
+
+    public void incrementConsecutiveDays() {
+        consecutiveDaysWorked++;
+    }
+
+    public void resetConsecutiveDays() {
+        consecutiveDaysWorked = 0;
+    }
+
+    public void updateHoursBetweenShifts(int hours) {
+        hoursBetweenShifts = hours;
+    }
+
+    public void updateHoursWorkedInSingleShift(int hours) {
+        hoursWorkedInSingleShift = hours;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public int getConsecutiveDaysWorked() {
+        return consecutiveDaysWorked;
+    }
+
+    public int getHoursBetweenShifts() {
+        return hoursBetweenShifts;
+    }
+
+    public int getHoursWorkedInSingleShift() {
+        return hoursWorkedInSingleShift;
+    }
+}
+
+public class EmployeeAnalyzer{
+    public static void main(String[] args) {
+        List<Employee> employees = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Employee_Data.txt"))) {
+            String line;
+            Employee currentEmployee = null;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                String name = parts[0];
+                int position = Integer.parseInt(parts[1]);
+                int hoursWorked = Integer.parseInt(parts[2]);
+
+                if (currentEmployee == null || !currentEmployee.getName().equals(name)) {
+                    currentEmployee = new Employee(name, position);
+                    employees.add(currentEmployee);
+                } else {
+                    currentEmployee.incrementConsecutiveDays();
+                    currentEmployee.updateHoursBetweenShifts(hoursWorked);
+                    currentEmployee.updateHoursWorkedInSingleShift(hoursWorked);
+                }
+
+                if (currentEmployee.getHoursBetweenShifts() < 1) {
+                    System.out.println("Employee " + currentEmployee.getName() +
+                            " at position " + currentEmployee.getPosition() +
+                            " has less than 1 hour between shifts.");
+                }
+
+                if (currentEmployee.getConsecutiveDaysWorked() >= 7) {
+                    System.out.println("Employee " + currentEmployee.getName() +
+                            " at position " + currentEmployee.getPosition() +
+                            " has worked for 7 consecutive days.");
+                }
+
+                if (currentEmployee.getHoursWorkedInSingleShift() > 14) {
+                    System.out.println("Employee " + currentEmployee.getName() +
+                            " at position " + currentEmployee.getPosition() +
+                            " has worked for more than 14 hours in a single shift.");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Writing the console output to a file
+        try (FileWriter writer = new FileWriter("output.txt")) {
+            for (Employee employee : employees) {
+                writer.write("Employee: " + employee.getName() + ", Position: " + employee.getPosition() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
